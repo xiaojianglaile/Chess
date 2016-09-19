@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">中国象棋</string>
+    
+    <string name="chu_river">楚 河</string>
+    <string name="chinese_border">汉 界</string>
+
+</resources>
