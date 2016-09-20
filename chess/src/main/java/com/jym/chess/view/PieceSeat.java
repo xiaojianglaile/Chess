@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.jym.chess.data.InitData;
 import com.jym.chess.data.Piece;
@@ -19,12 +20,15 @@ public class PieceSeat extends LinearLayout {
     private final int mRow = 10;
     private final int mCol = 9;
 
-    private LinearLayout[][] mSeats = new LinearLayout[mRow][mCol];
+    private LinearLayout[][] mSeats;
     private List<Piece> mBlackPiece;
     private List<Piece> mRedPiece;
     private PieceView mCurrentSelectedPiece;
 
     private PieceView.PIECE_TYPE mCurrentPlayer = PieceView.PIECE_TYPE.RED; // 0:红,1:黑
+    private int mGridW;
+    private int mGridH;
+    private int mPieceSize;
 
     public PieceSeat(Context context) {
         this(context, null);
@@ -69,6 +73,8 @@ public class PieceSeat extends LinearLayout {
     }
 
     private void initSeat(int width, int height) {
+        removeAllViews();
+        mSeats = new LinearLayout[mRow][mCol];
         setOrientation(VERTICAL);
         int padding = Math.abs(height - width) / 2;
         for (int i = 0; i < mRow; i++) {
@@ -106,12 +112,12 @@ public class PieceSeat extends LinearLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        int gridW = w / 10;
-        int gridH = (int) (h / 11.5);
-        int size = Math.min(gridW, gridH);
-        setPadding(gridW / 2, gridH / 2, gridW / 2, gridH / 2);
-        initSeat(gridW, gridH);
-        initPiece(size - 2);
+        mGridW = w / 10;
+        mGridH = (int) (h / 11.5);
+        mPieceSize = Math.min(mGridW, mGridH) - 2;
+        setPadding(mGridW / 2, mGridH / 2, mGridW / 2, mGridH / 2);
+        initSeat(mGridW, mGridH);
+        initPiece(mPieceSize);
     }
 
     private void clickPosition(int x, int y) {
@@ -520,6 +526,14 @@ public class PieceSeat extends LinearLayout {
             mBlackPiece.remove(targetPieceTag);
         }
         changePiecePosition(piece, x, y);
+        if (targetPieceTag.name.equals("将")) {
+            Toast.makeText(getContext(), "红方获胜", Toast.LENGTH_SHORT).show();
+            restartGame();
+        }
+        if (targetPieceTag.name.equals("帅")) {
+            Toast.makeText(getContext(), "黑方获胜", Toast.LENGTH_SHORT).show();
+            restartGame();
+        }
     }
 
     // 更换玩家
@@ -530,6 +544,12 @@ public class PieceSeat extends LinearLayout {
         } else {
             mCurrentPlayer = PieceView.PIECE_TYPE.RED;
         }
+    }
+
+    private void restartGame() {
+        initData();
+        initSeat(mGridW, mGridH);
+        initPiece(mPieceSize);
     }
 
 }
