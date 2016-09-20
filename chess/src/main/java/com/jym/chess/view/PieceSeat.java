@@ -454,6 +454,7 @@ public class PieceSeat extends LinearLayout {
                 if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
                     changePiecePositionAndKillPiece(piece, targetPiece, x, y);
                 }
+            } else {
                 Piece targetPieceTag = (Piece) targetPiece.getTag();
                 if (targetPieceTag.name.equals("将")) {
                     if (getVerticalHavePieceNum(y, x, piece.x) == 0) {
@@ -466,6 +467,7 @@ public class PieceSeat extends LinearLayout {
                 if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
                     changePiecePositionAndKillPiece(piece, targetPiece, x, y);
                 }
+            } else {
                 Piece targetPieceTag = (Piece) targetPiece.getTag();
                 if (targetPieceTag.name.equals("帅")) {
                     if (getVerticalHavePieceNum(y, piece.x, x) == 0) {
