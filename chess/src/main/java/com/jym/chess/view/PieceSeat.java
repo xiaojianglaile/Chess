@@ -142,17 +142,385 @@ public class PieceSeat extends LinearLayout {
     private void movePiece(PieceView targetPiece, int x, int y) {
         Piece piece = (Piece) mCurrentSelectedPiece.getTag();
         if (targetPiece == null) { // 移动棋子
-            mSeats[piece.x][piece.y].removeAllViews();
-            mSeats[x][y].addView(mCurrentSelectedPiece);
-            piece.x = x;
-            piece.y = y;
-            mCurrentSelectedPiece.changeState(false);
-            changePlayer();
+            switch (piece.name) {
+                case "卒":
+                case "兵":
+                    moveSoldier(piece, x, y);
+                    break;
+                case "炮":
+                case "车":
+                case "車":
+                    moveGunOrCar(piece, x, y);
+                    break;
+                case "马":
+                case "馬":
+                    moveHorse(piece, x, y);
+                    break;
+                case "象":
+                case "相":
+                    moveElephant(piece, x, y);
+                    break;
+                case "士":
+                case "仕":
+                    moveScholar(piece, x, y);
+                    break;
+                case "帅":
+                case "将":
+                    moveKing(piece, x, y);
+                    break;
+            }
         } else { // 移动棋子去吃对方棋子
-
+            switch (piece.name) {
+                case "卒":
+                case "兵":
+                    moveSoldierToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "炮":
+                    moveGunToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "车":
+                case "車":
+                    moveCarToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "马":
+                case "馬":
+                    moveHorseToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "象":
+                case "相":
+                    moveElephantToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "士":
+                case "仕":
+                    moveScholarToKillPiece(piece, targetPiece, x, y);
+                    break;
+                case "帅":
+                case "将":
+                    moveKingToKillPiece(piece, targetPiece, x, y);
+                    break;
+            }
         }
     }
 
+    // 移动士兵
+    private void moveSoldier(Piece piece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 6) {
+                if (piece.x - x == 1) {
+                    changePiecePosition(piece, x, y);
+                }
+            } else {
+                if ((piece.x - x == 1 && piece.y - y == 0) || (Math.abs(piece.y - y) == 1 && Math.abs(piece.x - x) == 0)) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        } else {
+            if (x >= 4) {
+                if ((piece.x - x == -1 && piece.y - y == 0) || (Math.abs(piece.y - y) == 1 && Math.abs(piece.x - x) == 0)) {
+                    changePiecePosition(piece, x, y);
+                }
+            } else {
+                if (piece.x - x == -1) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        }
+    }
+
+    // 移动士兵去杀人
+    private void moveSoldierToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 6) {
+                if (piece.x - x == 1) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            } else {
+                if ((piece.x - x == 1 && piece.y - y == 0) || (Math.abs(piece.y - y) == 1 && Math.abs(piece.x - x) == 0)) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            }
+        } else {
+            if (x >= 4) {
+                if ((piece.x - x == -1 && piece.y - y == 0) || (Math.abs(piece.y - y) == 1 && Math.abs(piece.x - x) == 0)) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            } else {
+                if (piece.x - x == -1) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            }
+        }
+    }
+
+    // 移动炮或车
+    private void moveGunOrCar(Piece piece, int x, int y) {
+        if (piece.x == x && piece.y != y) { // 横线移动
+            int max = Math.max(piece.y, y);
+            int min = Math.min(piece.y, y);
+            if (getHorizontalHavePieceNum(x, min, max) == 0) {
+                changePiecePosition(piece, x, y);
+            }
+        }
+        if (piece.x != x && piece.y == y) { // 竖向移动
+            int max = Math.max(piece.x, x);
+            int min = Math.min(piece.x, x);
+            if (getVerticalHavePieceNum(y, min, max) == 0) {
+                changePiecePosition(piece, x, y);
+            }
+        }
+    }
+
+    // 移动炮去杀人
+    private void moveGunToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (piece.x == x && piece.y != y) { // 横线移动
+            int max = Math.max(piece.y, y);
+            int min = Math.min(piece.y, y);
+            if (getHorizontalHavePieceNum(x, min, max) == 1) {
+                changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+            }
+        }
+        if (piece.x != x && piece.y == y) { // 竖向移动
+            int max = Math.max(piece.x, x);
+            int min = Math.min(piece.x, x);
+            if (getVerticalHavePieceNum(y, min, max) == 1) {
+                changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+            }
+        }
+    }
+
+    // 移动车去杀人
+    private void moveCarToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (piece.x == x && piece.y != y) { // 横线移动
+            int max = Math.max(piece.y, y);
+            int min = Math.min(piece.y, y);
+            if (getHorizontalHavePieceNum(x, min, max) == 0) {
+                changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+            }
+        }
+        if (piece.x != x && piece.y == y) { // 竖向移动
+            int max = Math.max(piece.x, x);
+            int min = Math.min(piece.x, x);
+            if (getVerticalHavePieceNum(y, min, max) == 0) {
+                changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+            }
+        }
+    }
+
+    // 移动马
+    private void moveHorse(Piece piece, int x, int y) {
+        if (piece.x - x == 2 && Math.abs(piece.y - y) == 1) { // 竖直左上走或右上走
+            if (mSeats[piece.x - 1][piece.y].getChildCount() == 0) { // 有无棋子阻拦
+                changePiecePosition(piece, x, y);
+            }
+        }
+        if (piece.x - x == -2 && Math.abs(piece.y - y) == 1) { // 竖直左下走或右下走
+            if (mSeats[piece.x + 1][piece.y].getChildCount() == 0) {
+                changePiecePosition(piece, x, y);
+            }
+        }
+        if (Math.abs(piece.x - x) == 1 && piece.y - y == 2) { // 横向左上走或左下走
+            if (mSeats[piece.x][piece.y - 1].getChildCount() == 0) {
+                changePiecePosition(piece, x, y);
+            }
+        }
+        if (Math.abs(piece.x - x) == 1 && piece.y - y == -2) { // 横向右上走或右下走
+            if (mSeats[piece.x][piece.y + 1].getChildCount() == 0) {
+                changePiecePosition(piece, x, y);
+            }
+        }
+    }
+
+    // 移动马去杀人
+    private void moveHorseToKillPiece(Piece piece, PieceView target, int x, int y) {
+        if (piece.x - x == 2 && Math.abs(piece.y - y) == 1) { // 竖直左上走或右上走
+            if (mSeats[piece.x - 1][piece.y].getChildCount() == 0) { // 有无棋子阻拦
+                changePiecePositionAndKillPiece(piece, target, x, y);
+            }
+        }
+        if (piece.x - x == -2 && Math.abs(piece.y - y) == 1) { // 竖直左下走或右下走
+            if (mSeats[piece.x + 1][piece.y].getChildCount() == 0) {
+                changePiecePositionAndKillPiece(piece, target, x, y);
+            }
+        }
+        if (Math.abs(piece.x - x) == 1 && piece.y - y == 2) { // 横向左上走或左下走
+            if (mSeats[piece.x][piece.y - 1].getChildCount() == 0) {
+                changePiecePositionAndKillPiece(piece, target, x, y);
+            }
+        }
+        if (Math.abs(piece.x - x) == 1 && piece.y - y == -2) { // 横向右上走或右下走
+            if (mSeats[piece.x][piece.y + 1].getChildCount() == 0) {
+                changePiecePositionAndKillPiece(piece, target, x, y);
+            }
+        }
+    }
+
+    // 移动象
+    private void moveElephant(Piece piece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 5) {
+                if (Math.abs(piece.x - x) == 2 && Math.abs(piece.y - y) == 2) { // 象22行走
+                    if (mSeats[(piece.x + x) / 2][(piece.y + y) / 2].getChildCount() == 0) { // 象路上无棋子阻拦
+                        changePiecePosition(piece, x, y);
+                    }
+                }
+            }
+        } else {
+            if (x <= 4) {
+                if (Math.abs(piece.x - x) == 2 && Math.abs(piece.y - y) == 2) {
+                    if (mSeats[(piece.x + x) / 2][(piece.y + y) / 2].getChildCount() == 0) {
+                        changePiecePosition(piece, x, y);
+                    }
+                }
+            }
+        }
+    }
+
+    // 移动象去杀人
+    private void moveElephantToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 5) {
+                if (Math.abs(piece.x - x) == 2 && Math.abs(piece.y - y) == 2) { // 象22行走
+                    if (mSeats[(piece.x + x) / 2][(piece.y + y) / 2].getChildCount() == 0) { // 象路上无棋子阻拦
+                        changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                    }
+                }
+            }
+        } else {
+            if (x <= 4) {
+                if (Math.abs(piece.x - x) == 2 && Math.abs(piece.y - y) == 2) {
+                    if (mSeats[(piece.x + x) / 2][(piece.y + y) / 2].getChildCount() == 0) {
+                        changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                    }
+                }
+            }
+        }
+    }
+
+    // 移动士
+    private void moveScholar(Piece piece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 7 && y >= 3 && y <= 5) { // 判断是否在移动范围内
+                if (Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 1) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        } else {
+            if (x <= 2 && y >= 3 && y <= 5) {
+                if (Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 1) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        }
+    }
+
+    // 移动士去杀人
+    private void moveScholarToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 7 && y >= 3 && y <= 5) { // 判断是否在移动范围内
+                if (Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 1) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            }
+        } else {
+            if (x <= 2 && y >= 3 && y <= 5) {
+                if (Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 1) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+            }
+        }
+    }
+
+    // 移动将军
+    private void moveKing(Piece piece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 7 && y >= 3 && y <= 5) { // 判断是否在移动范围内
+                if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        } else {
+            if (x <= 2 && y >= 3 && y <= 5) {
+                if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
+                    changePiecePosition(piece, x, y);
+                }
+            }
+        }
+    }
+
+    // 移动将军去杀人
+    private void moveKingToKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
+            if (x >= 7 && y >= 3 && y <= 5) { // 判断是否在移动范围内
+                if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+                Piece targetPieceTag = (Piece) targetPiece.getTag();
+                if (targetPieceTag.name.equals("将")) {
+                    if (getVerticalHavePieceNum(y, x, piece.x) == 0) {
+                        changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                    }
+                }
+            }
+        } else {
+            if (x <= 2 && y >= 3 && y <= 5) {
+                if ((Math.abs(piece.x - x) == 1 && Math.abs(piece.y - y) == 0) || (Math.abs(piece.x - x) == 0 && Math.abs(piece.y - y) == 1)) {
+                    changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                }
+                Piece targetPieceTag = (Piece) targetPiece.getTag();
+                if (targetPieceTag.name.equals("帅")) {
+                    if (getVerticalHavePieceNum(y, piece.x, x) == 0) {
+                        changePiecePositionAndKillPiece(piece, targetPiece, x, y);
+                    }
+                }
+            }
+        }
+    }
+
+    // 检查横向有无棋子
+    private int getHorizontalHavePieceNum(int x, int min, int max) {
+        int count = 0;
+        for (int i = min + 1; i < max; i++) {
+            if (mSeats[x][i].getChildCount() == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // 检查纵向有无棋子
+    private int getVerticalHavePieceNum(int y, int min, int max) {
+        int count = 0;
+        for (int i = min + 1; i < max; i++) {
+            if (mSeats[i][y].getChildCount() == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // 移动棋子
+    private void changePiecePosition(Piece piece, int x, int y) {
+        mSeats[piece.x][piece.y].removeAllViews();
+        mSeats[x][y].addView(mCurrentSelectedPiece);
+        piece.x = x;
+        piece.y = y;
+        mCurrentSelectedPiece.changeState(false);
+        changePlayer();
+    }
+
+    // 移动棋子并杀死原有棋子
+    private void changePiecePositionAndKillPiece(Piece piece, PieceView targetPiece, int x, int y) {
+        mSeats[x][y].removeAllViews();
+        Piece targetPieceTag = (Piece) targetPiece.getTag();
+        if (targetPieceTag.type == PieceView.PIECE_TYPE.RED) {
+            mRedPiece.remove(targetPieceTag);
+        } else {
+            mBlackPiece.remove(targetPieceTag);
+        }
+        changePiecePosition(piece, x, y);
+    }
+
+    // 更换玩家
     private void changePlayer() {
         mCurrentSelectedPiece = null;
         if (mCurrentPlayer == PieceView.PIECE_TYPE.RED) {
